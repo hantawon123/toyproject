@@ -18,6 +18,8 @@ void Player::init()
     stats[toIndex(StatType::MoveSpeed)] = 5.f;
     stats[toIndex(StatType::JumpPower)] = -15.f;
     stats[toIndex(StatType::MaxHp)] = 100.f;
+
+    hp = static_cast<int>(stats[toIndex(StatType::MaxHp)]);
 }
 
 // 왼쪽 이동
@@ -52,6 +54,19 @@ void Player::update(float dt)
 {
     velocityY += gravity;
     shape.move({0.f, velocityY});
+
+    // 무적시간 갱신
+    if (isInvincible)
+    {
+        invincibleTimer += dt;
+
+        if (invincibleTimer >= invincibleDuration)
+        {
+            isInvincible = false;
+            invincibleTimer = 0.f;
+            shape.setFillColor(sf::Color::Green);
+        }
+    }
 }
 
 // 착지
@@ -146,4 +161,38 @@ void Player::setPosition(float position[2])
 void Player::draw(sf::RenderWindow &window)
 {
     window.draw(shape);
+}
+
+void Player::takeDamage(int dmg)
+{
+    // 무적 상태면 데미지 무시
+    if (isInvincible)
+        return;
+
+    hp -= dmg;
+
+    if (hp < 0)
+        hp = 0;
+
+    // 맞은 직후 무적 시작
+    isInvincible = true;
+    invincibleTimer = 0.f;
+
+    // 피격 표시
+    shape.setFillColor(sf::Color::Cyan);
+}
+
+bool Player::getIsInvincible()
+{
+    return isInvincible;
+}
+
+int Player::getHp()
+{
+    return hp;
+}
+
+int Player::getMaxHp()
+{
+    return static_cast<int>(stats[toIndex(StatType::MaxHp)]);
 }

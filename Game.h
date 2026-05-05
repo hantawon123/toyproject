@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <array>
+#include <vector>
 #include "Player.h"
 #include "Monster.h"
 
@@ -8,6 +9,22 @@ class Game
 {
 private:
     sf::RenderWindow window;
+
+    // UI 배경
+    sf::RectangleShape statusPanel;
+
+    // HP Bar
+    sf::RectangleShape hpBarBack;
+    sf::RectangleShape hpBarFront;
+
+    // EXP Bar
+    sf::RectangleShape expBarBack;
+    sf::RectangleShape expBarFront;
+
+    // UI Text
+    std::optional<sf::Text> levelText;
+    std::optional<sf::Text> hpText;
+    std::optional<sf::Text> expText;
 
     Player player;
     Monster monster;
@@ -28,6 +45,12 @@ private:
     sf::Font font;
     std::optional<sf::Text> levelUpTitle;
     std::vector<sf::Text> optionTexts;
+
+    std::vector<Monster> monsters;
+
+    // 스폰 관련
+    float spawnTimer = 0.f;
+    float spawnInterval = 2.0f; // 2초마다 생성
 
 public:
     Game();

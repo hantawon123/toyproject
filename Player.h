@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 
+class Game;
+
 // 스탯 종류
 enum class StatType
 {
@@ -42,6 +44,14 @@ private:
     int exp = 0;
     int needExp = 3;
 
+    // 플레이어 체력
+    int hp = 100;
+
+    // 피격 무적시간
+    bool isInvincible = false;
+    float invincibleTimer = 0.f;
+    float invincibleDuration = 1.0f;
+
 public:
     void init();
 
@@ -49,6 +59,10 @@ public:
     void moveLeft();
     void moveRight();
     void jump();
+
+    // 피격 이벤트
+    void takeDamage(int dmg);
+    bool getIsInvincible();
 
     // 업데이트
     void update(float dt);
@@ -68,6 +82,8 @@ public:
     int getLevel();
     int getExp();
     int getNeedExp();
+    int getHp();
+    int getMaxHp();
 
     // setter
     void setPosition(float position[2]);
