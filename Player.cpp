@@ -19,18 +19,23 @@ void Player::init()
     stats[toIndex(StatType::JumpPower)] = -15.f;
     stats[toIndex(StatType::MaxHp)] = 100.f;
 
+    // 공격 범위
+    attackBox.setSize({70.f, 50.f});
+    attackBox.setFillColor(sf::Color(255, 255, 0, 120));
+
     hp = static_cast<int>(stats[toIndex(StatType::MaxHp)]);
 }
 
 // 왼쪽 이동
 void Player::moveLeft()
 {
+    direction = -1;
     shape.move({-stats[toIndex(StatType::MoveSpeed)], 0.f});
 }
-
 // 오른쪽 이동
 void Player::moveRight()
 {
+    direction = 1;
     shape.move({stats[toIndex(StatType::MoveSpeed)], 0.f});
 }
 
@@ -67,8 +72,46 @@ void Player::update(float dt)
             shape.setFillColor(sf::Color::Green);
         }
     }
+
+    // 공격 시간 갱신
+    if (isAttacking)
+    {
+        attackTimer += dt;
+
+        if (attackTimer >= attackDuration)
+        {
+            isAttacking = false;
+            attackTimer = 0.f;
+        }
+    }
 }
 
+void Player::attack()
+{
+    if (isAttacking)
+        return;
+
+    isAttacking = true;
+    attackTimer = 0.f;
+
+    sf::Vector2f pos = shape.getPosition();
+    sf::Vector2f size = shape.getSize();
+
+    if (direction == 1)
+        attackBox.setPosition({pos.x + size.x, pos.y});
+    else
+        attackBox.setPosition({pos.x - attackBox.getSize().x, pos.y});
+}
+
+bool Player::getIsAttacking()
+{
+    return isAttacking;
+}
+
+sf::FloatRect Player::getAttackBounds()
+{
+    return attackBox.getGlobalBounds();
+}
 // 착지
 void Player::land(float groundY)
 {
@@ -104,7 +147,7 @@ std::vector<LevelUpOption> Player::getLevelUpOptions()
 void Player::levelUp(const LevelUpOption &option)
 {
     // 경험치 차감
-    exp -= needExp;
+    exp = 0;
 
     // 레벨 증가
     level++;
@@ -161,6 +204,10 @@ void Player::setPosition(float position[2])
 void Player::draw(sf::RenderWindow &window)
 {
     window.draw(shape);
+
+    // 공격 중일 때만 공격 범위 표시
+    if (isAttacking)
+        window.draw(attackBox);
 }
 
 void Player::takeDamage(int dmg)

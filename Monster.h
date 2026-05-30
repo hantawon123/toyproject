@@ -33,6 +33,10 @@ private:
     float detectRange = 500.f; // 추적 시작 거리
     float attackRange = 60.f;  // 공격 가능 거리
 
+    // HP Bar
+    sf::RectangleShape hpBarBack;
+    sf::RectangleShape hpBarFront;
+
 public:
     void init();
 
@@ -44,11 +48,14 @@ public:
     void chase(sf::Vector2f playerPos);
     void attack();
 
+    sf::Vector2f getPosition();
     void takeDamage(int dmg);
 
     bool isAlive();
 
     sf::FloatRect getBounds();
+
+    void updateHpBar();
 
     void draw(sf::RenderWindow &window);
 };

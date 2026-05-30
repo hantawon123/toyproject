@@ -52,6 +52,14 @@ private:
     float invincibleTimer = 0.f;
     float invincibleDuration = 1.0f;
 
+    // 공격
+    bool isAttacking = false;
+    float attackTimer = 0.f;
+    float attackDuration = 0.15f;
+
+    int direction = 1; // 1: 오른쪽, -1: 왼쪽
+    sf::RectangleShape attackBox;
+
 public:
     void init();
 
@@ -59,6 +67,11 @@ public:
     void moveLeft();
     void moveRight();
     void jump();
+
+    // 공격
+    void attack();
+    bool getIsAttacking();
+    sf::FloatRect getAttackBounds();
 
     // 피격 이벤트
     void takeDamage(int dmg);

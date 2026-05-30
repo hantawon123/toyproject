@@ -12,6 +12,14 @@ void Monster::init()
 
     state = MonsterState::Idle;
     hp = maxHp;
+
+    // 몬스터 HP Bar 배경
+    hpBarBack.setSize({50.f, 6.f});
+    hpBarBack.setFillColor(sf::Color(60, 60, 60));
+
+    // 몬스터 HP Bar 실제 체력
+    hpBarFront.setSize({50.f, 6.f});
+    hpBarFront.setFillColor(sf::Color::Red);
 }
 
 // 매 프레임 업데이트
@@ -41,6 +49,7 @@ void Monster::update(sf::Vector2f playerPos, float dt, Player &player)
     case MonsterState::Dead:
         break;
     }
+    updateHpBar();
 }
 // 공격
 void Monster::attack(Player &player)
@@ -74,11 +83,30 @@ void Monster::updateState(sf::Vector2f playerPos)
         state = MonsterState::Idle;
     }
 }
+void Monster::updateHpBar()
+{
+    sf::Vector2f pos = shape.getPosition();
+
+    hpBarBack.setPosition({pos.x, pos.y - 12.f});
+    hpBarFront.setPosition({pos.x, pos.y - 12.f});
+
+    float hpRatio = static_cast<float>(hp) / maxHp;
+
+    if (hpRatio < 0.f)
+        hpRatio = 0.f;
+
+    hpBarFront.setSize({50.f * hpRatio, 6.f});
+}
 
 // 대기 상태
 void Monster::idle()
 {
     // 일단 아무 행동 안 함
+}
+
+sf::Vector2f Monster::getPosition()
+{
+    return shape.getPosition();
 }
 
 // 추적 상태
@@ -123,5 +151,9 @@ sf::FloatRect Monster::getBounds()
 void Monster::draw(sf::RenderWindow &window)
 {
     if (state != MonsterState::Dead)
+    {
         window.draw(shape);
+        window.draw(hpBarBack);
+        window.draw(hpBarFront);
+    }
 }

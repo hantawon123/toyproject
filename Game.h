@@ -34,6 +34,7 @@ private:
     bool prevjumped;
     bool prevlevelup;
     bool prevchoosed;
+    bool prevAttack = false;
 
     // 레벨업 창 표시 여부
     bool isLevelUpChoosing = false;
@@ -52,6 +53,15 @@ private:
     float spawnTimer = 0.f;
     float spawnInterval = 2.0f; // 2초마다 생성
 
+    struct DamageText
+    {
+        sf::Text text;
+        float timer = 0.f;
+        float duration = 0.7f;
+    };
+
+    std::vector<DamageText> damageTexts;
+
 public:
     Game();
     void run();
@@ -63,4 +73,6 @@ public:
     // 레벨업 UI 준비
     void openLevelUpMenu();
     void applyLevelUpOption(int index);
+
+    void addDamageText(int damage, sf::Vector2f position);
 };

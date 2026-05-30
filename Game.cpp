@@ -1,5 +1,7 @@
 #include "Game.h"
 #include <optional>
+#include <algorithm>
+#include <random>
 
 // 생성자
 Game::Game()
@@ -156,6 +158,15 @@ void Game::handleInput()
 
         prevjumped = curSpacePressed;
     }
+
+    bool curAttack = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::J);
+
+    if (curAttack && !prevAttack)
+    {
+        player.attack();
+    }
+
+    prevAttack = curAttack;
 }
 
 // 업데이트
@@ -210,10 +221,13 @@ void Game::update(float dt)
     // 충돌
     for (auto &m : monsters)
     {
-        if (m.isAlive() &&
-            player.getBounds().findIntersection(m.getBounds()))
+        if (player.getIsAttacking() &&
+            m.isAlive() &&
+            player.getAttackBounds().findIntersection(m.getBounds()))
         {
-            m.takeDamage(static_cast<int>(player.getStat(StatType::Attack)));
+            int damage = static_cast<int>(player.getStat(StatType::Attack));
+            m.takeDamage(damage);
+            addDamageText(damage, m.getPosition());
         }
     }
 
@@ -259,6 +273,20 @@ void Game::update(float dt)
             "EXP " + std::to_string(player.getExp()) +
             " / " + std::to_string(player.getNeedExp()));
     }
+
+    for (int i = 0; i < damageTexts.size(); i++)
+    {
+        damageTexts[i].timer += dt;
+
+        // 위로 떠오르게 이동
+        damageTexts[i].text.move({0.f, -50.f * dt});
+
+        if (damageTexts[i].timer >= damageTexts[i].duration)
+        {
+            damageTexts.erase(damageTexts.begin() + i);
+            i--;
+        }
+    }
 }
 
 // 렌더링
@@ -303,6 +331,11 @@ void Game::render()
             window.draw(optionTexts[i]);
     }
 
+    for (auto &damageText : damageTexts)
+    {
+        window.draw(damageText.text);
+    }
+
     window.display();
 }
 
@@ -311,15 +344,36 @@ void Game::openLevelUpMenu()
 {
     std::vector<LevelUpOption> options = player.getLevelUpOptions();
 
+    // 랜덤 엔진 생성
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+
+    // 선택지 섞기
+    std::shuffle(options.begin(), options.end(), gen);
+
+    // 앞에서 3개 선택
     currentOptions[0] = options[0];
     currentOptions[1] = options[1];
     currentOptions[2] = options[2];
 
+    // UI 텍스트 갱신
     optionTexts[0].setString("1. " + currentOptions[0].label);
     optionTexts[1].setString("2. " + currentOptions[1].label);
     optionTexts[2].setString("3. " + currentOptions[2].label);
 
     isLevelUpChoosing = true;
+}
+
+void Game::addDamageText(int damage, sf::Vector2f position)
+{
+    DamageText damageText{sf::Text(font)};
+
+    damageText.text.setCharacterSize(24);
+    damageText.text.setFillColor(sf::Color::Yellow);
+    damageText.text.setString(std::to_string(damage));
+    damageText.text.setPosition(position);
+
+    damageTexts.push_back(damageText);
 }
 
 // 선택 적용
